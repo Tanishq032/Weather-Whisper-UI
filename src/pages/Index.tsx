@@ -1,4 +1,3 @@
-
 import { AnimatedBackground } from "@/components/weather/animated-background";
 import { BottomNav } from "@/components/weather/bottom-nav";
 import { CelestialBackground } from "@/components/weather/celestial-background";
@@ -13,7 +12,6 @@ import { WeatherStats } from "@/components/weather/weather-stats";
 import { useSoundEffects } from "@/hooks/use-sound-effects";
 import { useEffect, useState } from "react";
 
-// Define weather data types
 interface CityWeatherData {
   city: string;
   temperature: number;
@@ -62,7 +60,6 @@ const Index = () => {
   const [weatherCondition, setWeatherCondition] = useState("Partly Cloudy");
   const { play } = useSoundEffects();
 
-  // Create city-specific data
   const cityWeatherData: Record<string, CityWeatherData> = {
     "New York": {
       city: "New York",
@@ -384,18 +381,16 @@ const Index = () => {
         { time: "6AM", index: 1 },
         { time: "9AM", index: 3 },
         { time: "12PM", index: 5 },
-        { time: "3PM", index: 5 },  // Fixed: Changed 'speed' to 'index'
+        { time: "3PM", index: 5 },
         { time: "6PM", index: 3 },
         { time: "9PM", index: 0 },
       ],
     },
   };
 
-  // Get the current city's weather data
   const currentCityData = cityWeatherData[currentLocation];
 
   useEffect(() => {
-    // Update weather condition based on location change
     if (currentCityData) {
       setWeatherCondition(currentCityData.condition);
     }
@@ -449,7 +444,10 @@ const Index = () => {
       case "search":
         return (
           <div className="space-y-6">
-            <LocationSearch onLocationSelect={handleLocationSelect} />
+            <LocationSearch 
+              onLocationSelect={handleLocationSelect} 
+              currentLocation={currentLocation}
+            />
           </div>
         );
       case "settings":
@@ -471,8 +469,10 @@ const Index = () => {
       
       <Header currentLocation={currentLocation} />
       
-      <main className="max-w-md mx-auto px-4 pt-4">
-        {renderActiveTab()}
+      <main className="container mx-auto px-4 pt-4 md:pt-8 max-w-screen-xl">
+        <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
+          {renderActiveTab()}
+        </div>
       </main>
       
       <BottomNav 

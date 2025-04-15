@@ -3,7 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { Droplet, Sun, Thermometer, Wind } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { 
+  Area, 
+  AreaChart, 
+  Bar, 
+  BarChart, 
+  CartesianGrid, 
+  Cell, 
+  Pie, 
+  PieChart, 
+  ResponsiveContainer, 
+  Tooltip, 
+  XAxis, 
+  YAxis,
+  Legend
+} from "recharts"
 import { useEffect, useState } from "react"
 
 interface WeatherStatsProps {
@@ -26,6 +40,7 @@ export function WeatherStats({
   
   // State to control animation
   const [animate, setAnimate] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0)
   
   // Trigger animation on component mount
   useEffect(() => {
@@ -47,6 +62,7 @@ export function WeatherStats({
         },
         wind: {
           fill: "#2196F3", // Bright blue
+          hover: "#1976D2", // Darker blue for hover
         },
         humidity: {
           stroke: "#4CAF50", // Bright green
@@ -66,6 +82,7 @@ export function WeatherStats({
       },
       wind: {
         fill: "var(--weather-cloudy)",
+        hover: "var(--secondary)",
       },
       humidity: {
         stroke: "var(--weather-rainy)",
@@ -91,6 +108,27 @@ export function WeatherStats({
   // Animation duration based on state
   const animationDuration = animate ? 1500 : 0
   
+  // Tooltip formatter for better readability
+  const temperatureFormatter = (value: number) => `${value}°C`
+  const windFormatter = (value: number) => `${value} km/h`
+  const humidityFormatter = (value: number) => `${value}%`
+  const uvFormatter = (value: number) => {
+    if (value >= 8) return `${value} (Very High)`;
+    if (value >= 6) return `${value} (High)`;
+    if (value >= 3) return `${value} (Moderate)`;
+    return `${value} (Low)`;
+  }
+
+  // Custom active shape for pie chart with more detail
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
+  // Format time for chart labels
+  const formatXAxis = (time: string) => {
+    return time;
+  }
+
   return (
     <Card className={cn(
       "bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all duration-300",
@@ -107,7 +145,7 @@ export function WeatherStats({
               <Thermometer className="h-4 w-4 text-primary" />
               <h3 className="font-medium">Temperature Trend</h3>
             </div>
-            <div className="h-[180px] w-full p-1 transition-all duration-500">
+            <div className="h-[200px] w-full p-1 transition-all duration-500">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={temperatureData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -117,28 +155,46 @@ export function WeatherStats({
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
-                  <XAxis dataKey="time" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
+                  <XAxis 
+                    dataKey="time" 
+                    tick={{ fontSize: 11 }} 
+                    tickFormatter={formatXAxis} 
+                    padding={{ left: 10, right: 10 }}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 11 }} 
+                    domain={['dataMin - 2', 'dataMax + 2']}
+                    tickFormatter={temperatureFormatter}
+                  />
                   <Tooltip 
+                    formatter={temperatureFormatter}
                     contentStyle={{ 
                       backgroundColor: 'var(--card)',
                       borderColor: 'var(--border)',
                       borderRadius: '0.5rem',
                       fontWeight: isHighContrast ? 'bold' : 'normal',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     }}
                     labelStyle={{ fontWeight: 'bold' }}
+                    cursor={{ stroke: 'var(--muted-foreground)', strokeWidth: 1, strokeDasharray: '3 3' }}
                   />
                   <Area 
                     type="monotone" 
                     dataKey="temp" 
+                    name="Temperature"
                     stroke={colors.temp.stroke} 
                     fillOpacity={1}
                     fill="url(#tempGradient)" 
                     strokeWidth={isHighContrast ? 3 : 2}
-                    activeDot={{ r: 8, strokeWidth: 2 }}
+                    activeDot={{ r: 8, strokeWidth: 2, stroke: 'var(--background)' }}
                     isAnimationActive={true}
                     animationDuration={animationDuration}
                     animationEasing="ease-out"
+                  />
+                  <Legend 
+                    verticalAlign="top" 
+                    height={36}
+                    formatter={() => "Temperature (°C)"}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -150,29 +206,45 @@ export function WeatherStats({
               <Wind className="h-4 w-4 text-primary" />
               <h3 className="font-medium">Wind Speed</h3>
             </div>
-            <div className="h-[180px] w-full p-1 transition-all duration-500">
+            <div className="h-[200px] w-full p-1 transition-all duration-500">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={windData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
-                  <XAxis dataKey="time" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
+                  <XAxis 
+                    dataKey="time" 
+                    tick={{ fontSize: 11 }}
+                    padding={{ left: 10, right: 10 }}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 11 }} 
+                    tickFormatter={(value) => `${value} km/h`}
+                  />
                   <Tooltip 
+                    formatter={windFormatter}
                     contentStyle={{ 
                       backgroundColor: 'var(--card)',
                       borderColor: 'var(--border)',
                       borderRadius: '0.5rem',
                       fontWeight: isHighContrast ? 'bold' : 'normal',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     }}
                     labelStyle={{ fontWeight: 'bold' }}
                     cursor={{ fill: 'var(--muted)', opacity: 0.3 }}
                   />
                   <Bar 
-                    dataKey="speed" 
+                    dataKey="speed"
+                    name="Wind Speed"
                     fill={colors.wind.fill} 
                     radius={[4, 4, 0, 0]}
                     isAnimationActive={true}
                     animationDuration={animationDuration}
                     animationEasing="ease-out"
+                    activeBar={{ fill: colors.wind.hover, stroke: 'var(--background)', strokeWidth: 1 }}
+                  />
+                  <Legend 
+                    verticalAlign="top" 
+                    height={36}
+                    formatter={() => "Wind Speed (km/h)"}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -184,7 +256,7 @@ export function WeatherStats({
               <Droplet className="h-4 w-4 text-primary" />
               <h3 className="font-medium">Humidity</h3>
             </div>
-            <div className="h-[180px] w-full p-1 transition-all duration-500">
+            <div className="h-[200px] w-full p-1 transition-all duration-500">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={humidityData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -194,28 +266,45 @@ export function WeatherStats({
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
-                  <XAxis dataKey="time" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
+                  <XAxis 
+                    dataKey="time" 
+                    tick={{ fontSize: 11 }}
+                    padding={{ left: 10, right: 10 }}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 11 }} 
+                    domain={[0, 100]}
+                    tickFormatter={humidityFormatter}
+                  />
                   <Tooltip 
+                    formatter={humidityFormatter}
                     contentStyle={{ 
                       backgroundColor: 'var(--card)',
                       borderColor: 'var(--border)',
                       borderRadius: '0.5rem',
                       fontWeight: isHighContrast ? 'bold' : 'normal',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     }}
                     labelStyle={{ fontWeight: 'bold' }}
+                    cursor={{ stroke: 'var(--muted-foreground)', strokeWidth: 1, strokeDasharray: '3 3' }}
                   />
                   <Area 
                     type="monotone" 
-                    dataKey="humidity" 
+                    dataKey="humidity"
+                    name="Humidity" 
                     stroke={colors.humidity.stroke} 
                     fillOpacity={1}
                     fill="url(#humidityGradient)" 
                     strokeWidth={isHighContrast ? 3 : 2}
-                    activeDot={{ r: 8, strokeWidth: 2 }}
+                    activeDot={{ r: 8, strokeWidth: 2, stroke: 'var(--background)' }}
                     isAnimationActive={true}
                     animationDuration={animationDuration}
                     animationEasing="ease-out"
+                  />
+                  <Legend 
+                    verticalAlign="top" 
+                    height={36}
+                    formatter={() => "Humidity (%)"}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -227,39 +316,53 @@ export function WeatherStats({
               <Sun className="h-4 w-4 text-primary" />
               <h3 className="font-medium">UV Index</h3>
             </div>
-            <div className="h-[180px] w-full p-1 transition-all duration-500 flex items-center justify-center">
+            <div className="h-[200px] w-full p-1 transition-all duration-500 flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={uvIndexData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={isHighContrast ? 45 : 50}
-                    outerRadius={isHighContrast ? 75 : 70}
-                    paddingAngle={isHighContrast ? 4 : 2}
+                    innerRadius={isHighContrast ? 40 : 45}
+                    outerRadius={isHighContrast ? 80 : 75}
+                    paddingAngle={isHighContrast ? 5 : 3}
                     dataKey="index"
+                    nameKey="time"
                     isAnimationActive={true}
                     animationDuration={animationDuration}
                     animationEasing="ease-out"
                     animationBegin={300}
                     strokeWidth={isHighContrast ? 2 : 1}
                     stroke={isHighContrast ? "#000" : "rgba(0,0,0,0.1)"}
+                    onMouseEnter={onPieEnter}
+                    label={(entry) => entry.time}
+                    labelLine={{ stroke: 'var(--muted-foreground)', strokeWidth: 0.5 }}
                   >
                     {uvIndexData.map((entry, index) => (
                       <Cell 
                         key={`cell-${index}`}
                         fill={getUvIndexColor(entry.index)}
+                        opacity={index === activeIndex ? 1 : 0.8}
+                        stroke={index === activeIndex ? 'var(--foreground)' : undefined}
+                        strokeWidth={index === activeIndex ? 2 : 1}
                       />
                     ))}
                   </Pie>
                   <Tooltip 
+                    formatter={uvFormatter}
                     contentStyle={{ 
                       backgroundColor: 'var(--card)',
                       borderColor: 'var(--border)',
                       borderRadius: '0.5rem',
                       fontWeight: isHighContrast ? 'bold' : 'normal',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     }}
                     labelStyle={{ fontWeight: 'bold' }}
+                  />
+                  <Legend 
+                    formatter={() => "UV Index by Time"}
+                    verticalAlign="top"
+                    height={36}
                   />
                 </PieChart>
               </ResponsiveContainer>
