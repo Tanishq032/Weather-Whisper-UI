@@ -384,7 +384,7 @@ const Index = () => {
         { time: "6AM", index: 1 },
         { time: "9AM", index: 3 },
         { time: "12PM", index: 5 },
-        { time: "3PM", speed: 5 },
+        { time: "3PM", index: 5 },  // Fixed: Changed 'speed' to 'index'
         { time: "6PM", index: 3 },
         { time: "9PM", index: 0 },
       ],
