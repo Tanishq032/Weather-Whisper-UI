@@ -129,7 +129,7 @@ export function WeatherStats({
     return time;
   }
 
-  // Custom label for the UV index pie chart to fix text overlap
+  // Custom label for the UV index pie chart with improved positioning
   const renderCustomizedPieLabel = ({
     cx,
     cy,
@@ -139,24 +139,57 @@ export function WeatherStats({
     index,
     time
   }: any) => {
-    // Calculate position for the label
+    // Calculate position for the label with increased radius to prevent overlap
     const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 1.4; // Move labels further out
+    const radius = innerRadius + (outerRadius - innerRadius) * 1.8; // Increased radius multiplier
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
     
+    // Add a background to make text more readable
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="var(--foreground)"
-        textAnchor={x > cx ? 'start' : 'end'} 
-        dominantBaseline="central"
-        fontSize="11"
-        fontWeight={index === activeIndex ? "bold" : "normal"}
-      >
-        {time}
-      </text>
+      <g>
+        {/* Text background for better readability */}
+        <rect 
+          x={x - 20} 
+          y={y - 8} 
+          width={40} 
+          height={16} 
+          rx={4}
+          fill="var(--card)"
+          fillOpacity={0.7}
+          stroke="var(--border)"
+          strokeWidth={0.5}
+          className="transition-all duration-200"
+          style={{
+            transform: index === activeIndex ? 'scale(1.1)' : 'scale(1)',
+            opacity: index === activeIndex ? 1 : 0.8
+          }}
+        />
+        {/* Text label */}
+        <text 
+          x={x} 
+          y={y} 
+          fill="var(--foreground)"
+          textAnchor="middle" 
+          dominantBaseline="central"
+          fontSize="11"
+          fontWeight={index === activeIndex ? "bold" : "normal"}
+          className="transition-all duration-200"
+        >
+          {time}
+        </text>
+        {/* Connection line */}
+        <line
+          x1={cx + (innerRadius + 5) * Math.cos(-midAngle * RADIAN)}
+          y1={cy + (innerRadius + 5) * Math.sin(-midAngle * RADIAN)}
+          x2={x - (index === activeIndex ? 15 : 10) * Math.cos(-midAngle * RADIAN)}
+          y2={y - (index === activeIndex ? 15 : 10) * Math.sin(-midAngle * RADIAN)}
+          stroke="var(--muted-foreground)"
+          strokeWidth={index === activeIndex ? 1 : 0.5}
+          strokeDasharray={index === activeIndex ? "" : "3 3"}
+          className="transition-all duration-200"
+        />
+      </g>
     );
   };
 
@@ -367,11 +400,6 @@ export function WeatherStats({
                     stroke={isHighContrast ? "#000" : "rgba(0,0,0,0.1)"}
                     onMouseEnter={onPieEnter}
                     label={renderCustomizedPieLabel}
-                    labelLine={{
-                      stroke: 'var(--muted-foreground)',
-                      strokeWidth: 0.5,
-                      strokeDasharray: '3 3'
-                    }}
                   >
                     {uvIndexData.map((entry, index) => (
                       <Cell 
@@ -380,6 +408,12 @@ export function WeatherStats({
                         opacity={index === activeIndex ? 1 : 0.8}
                         stroke={index === activeIndex ? 'var(--foreground)' : undefined}
                         strokeWidth={index === activeIndex ? 2 : 1}
+                        className="transition-all duration-300 ease-in-out"
+                        style={{
+                          filter: index === activeIndex ? 'drop-shadow(0 0 8px rgba(0,0,0,0.2))' : 'none',
+                          transform: index === activeIndex ? 'scale(1.05)' : 'scale(1)',
+                          transformOrigin: 'center'
+                        }}
                       />
                     ))}
                   </Pie>
@@ -391,8 +425,12 @@ export function WeatherStats({
                       borderRadius: '0.5rem',
                       fontWeight: isHighContrast ? 'bold' : 'normal',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      transform: 'scale(1.05)',
+                      transition: 'all 0.2s ease-in-out',
                     }}
                     labelStyle={{ fontWeight: 'bold' }}
+                    animationDuration={200}
+                    animationEasing="ease-in-out"
                   />
                   <Legend 
                     formatter={() => "UV Index by Time"}

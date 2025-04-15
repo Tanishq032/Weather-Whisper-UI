@@ -73,7 +73,7 @@ const Index = () => {
     switch (activeTab) {
       case "home":
         return (
-          <div className="space-y-8 lg:space-y-10">
+          <div className="space-y-10 lg:space-y-12 px-2 md:px-4">
             <CurrentWeatherCard
               city={currentCityData.city}
               temperature={currentCityData.temperature}
@@ -83,35 +83,48 @@ const Index = () => {
               humidity={currentCityData.humidity}
               uvIndex={currentCityData.uvIndex}
               pressure={currentCityData.pressure}
+              className="md:mx-auto max-w-3xl lg:max-w-4xl"
             />
-            <HourlyForecast forecastData={currentCityData.hourlyForecast} />
+            <div className="my-8"></div> {/* Added extra spacing */}
+            <HourlyForecast 
+              forecastData={currentCityData.hourlyForecast} 
+              className="md:mx-auto max-w-3xl lg:max-w-4xl"
+            />
           </div>
         );
       case "weekly":
         return (
-          <div className="space-y-6">
-            <DailyForecast forecastData={currentCityData.weeklyForecast} />
+          <div className="space-y-8 px-2 md:px-4">
+            <DailyForecast 
+              forecastData={currentCityData.weeklyForecast}
+              className="md:mx-auto max-w-3xl lg:max-w-4xl" 
+            />
+            <div className="my-6"></div> {/* Added extra spacing */}
             <WeatherStats
               temperatureData={currentCityData.temperatureData}
               windData={currentCityData.windData}
               humidityData={currentCityData.humidityData}
               uvIndexData={currentCityData.uvIndexData}
+              className="md:mx-auto max-w-4xl"
             />
           </div>
         );
       case "search":
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 px-2 md:px-4">
             <LocationSearch 
               onLocationSelect={handleLocationSelect} 
               currentLocation={currentLocation}
+              className="md:mx-auto max-w-3xl lg:max-w-4xl"
             />
           </div>
         );
       case "settings":
         return (
-          <div className="space-y-6">
-            <SettingsPanel />
+          <div className="space-y-6 px-2 md:px-4">
+            <SettingsPanel 
+              className="md:mx-auto max-w-3xl lg:max-w-4xl"
+            />
           </div>
         );
       default:
@@ -127,8 +140,8 @@ const Index = () => {
       
       <Header currentLocation={currentLocation} />
       
-      <main className="container mx-auto px-4 pt-4 md:pt-8 max-w-screen-xl">
-        <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
+      <main className="container mx-auto px-2 sm:px-4 pt-4 md:pt-8 max-w-screen-xl">
+        <div className="mx-auto">
           {renderActiveTab()}
         </div>
       </main>
