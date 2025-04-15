@@ -7,7 +7,9 @@ import { Switch } from "@/components/ui/switch"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import { BellRing, CircleUser, CloudSun, Contact, Eye, HeartHandshake, Volume2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useTheme } from "@/components/theme-provider"
+import { useSoundEffects } from "@/hooks/use-sound-effects"
 
 interface SettingItemProps {
   icon: React.ReactNode
@@ -34,11 +36,26 @@ interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ className }: SettingsPanelProps) {
+  const { contrastMode, setContrastMode } = useTheme()
+  const { enabled: soundEnabled, setEnabled: setSoundEnabled, play } = useSoundEffects()
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
-  const [soundEnabled, setSoundEnabled] = useState(false)
-  const [highContrastEnabled, setHighContrastEnabled] = useState(false)
   const [voiceoverEnabled, setVoiceoverEnabled] = useState(false)
   const [tempUnit, setTempUnit] = useState("celsius")
+  
+  // Function to handle switch toggle with sound
+  const handleToggleWithSound = (
+    currentValue: boolean,
+    setter: (value: boolean) => void
+  ) => {
+    play("switch")
+    setter(!currentValue)
+  }
+
+  // Handle high contrast toggle
+  const handleContrastToggle = () => {
+    play("switch")
+    setContrastMode(contrastMode === "normal" ? "high" : "normal")
+  }
   
   return (
     <Card className={cn("bg-gradient-to-br from-card to-card/50 backdrop-blur-sm animate-fade-in", className)}>
@@ -60,7 +77,10 @@ export function SettingsPanel({ className }: SettingsPanelProps) {
               control={
                 <RadioGroup 
                   defaultValue={tempUnit} 
-                  onValueChange={setTempUnit}
+                  onValueChange={(value) => {
+                    setTempUnit(value)
+                    play("click")
+                  }}
                   className="flex items-center space-x-4"
                 >
                   <div className="flex items-center space-x-1">
@@ -82,7 +102,7 @@ export function SettingsPanel({ className }: SettingsPanelProps) {
               control={
                 <Switch 
                   checked={notificationsEnabled} 
-                  onCheckedChange={setNotificationsEnabled} 
+                  onCheckedChange={() => handleToggleWithSound(notificationsEnabled, setNotificationsEnabled)}
                   className="animate-pulse-gentle"
                 />
               }
@@ -95,7 +115,8 @@ export function SettingsPanel({ className }: SettingsPanelProps) {
               control={
                 <Switch 
                   checked={soundEnabled} 
-                  onCheckedChange={setSoundEnabled} 
+                  onCheckedChange={() => handleToggleWithSound(soundEnabled, setSoundEnabled)}
+                  className={soundEnabled ? "animate-pulse-gentle" : ""}
                 />
               }
             />
@@ -110,8 +131,9 @@ export function SettingsPanel({ className }: SettingsPanelProps) {
               description="Increase visibility and contrast"
               control={
                 <Switch 
-                  checked={highContrastEnabled} 
-                  onCheckedChange={setHighContrastEnabled} 
+                  checked={contrastMode === "high"} 
+                  onCheckedChange={handleContrastToggle}
+                  className={contrastMode === "high" ? "animate-pulse-gentle" : ""}
                 />
               }
             />
@@ -123,7 +145,7 @@ export function SettingsPanel({ className }: SettingsPanelProps) {
               control={
                 <Switch 
                   checked={voiceoverEnabled} 
-                  onCheckedChange={setVoiceoverEnabled} 
+                  onCheckedChange={() => handleToggleWithSound(voiceoverEnabled, setVoiceoverEnabled)}
                 />
               }
             />
@@ -133,14 +155,24 @@ export function SettingsPanel({ className }: SettingsPanelProps) {
             <h3 className="text-sm font-medium text-muted-foreground">Account</h3>
             
             <div className="flex justify-between items-center">
-              <Button variant="outline" className="w-full" size="sm">
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                size="sm"
+                onClick={() => play("click")}
+              >
                 <CircleUser className="mr-2 h-4 w-4" />
                 Manage Profile
               </Button>
             </div>
             
             <div className="flex justify-between items-center">
-              <Button variant="outline" className="w-full" size="sm">
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                size="sm"
+                onClick={() => play("click")}
+              >
                 <Contact className="mr-2 h-4 w-4" />
                 Contact Support
               </Button>

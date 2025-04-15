@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -82,6 +83,86 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+  
+  /* High contrast mode */
+  .high-contrast {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 44 100% 50%; /* Yellow for maximum contrast */
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 80%;
+
+    --accent: 256 100% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 100% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 30%;
+    --input: 0 0% 20%;
+    --ring: 44 100% 50%;
+    
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 44 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 30%;
+    --sidebar-ring: 44 100% 50%;
+  }
+  
+  /* High contrast dark mode */
+  .dark.high-contrast {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 44 100% 50%; /* Yellow for maximum contrast */
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 90%;
+
+    --accent: 256 100% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 100% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 40%;
+    --input: 0 0% 20%;
+    --ring: 44 100% 50%;
+    
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 44 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 40%;
+    --sidebar-ring: 44 100% 50%;
+  }
 }
 
 @layer base {
@@ -101,6 +182,28 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Montserrat', sans-serif;
+  }
+  
+  /* Increase text sizes for high contrast mode */
+  .high-contrast h1, 
+  .high-contrast h2, 
+  .high-contrast h3, 
+  .high-contrast h4, 
+  .high-contrast h5, 
+  .high-contrast h6,
+  .high-contrast p,
+  .high-contrast span {
+    font-weight: 500;
+  }
+  
+  /* Add focus outlines for high contrast mode */
+  .high-contrast button:focus,
+  .high-contrast a:focus,
+  .high-contrast input:focus,
+  .high-contrast select:focus,
+  .high-contrast textarea:focus {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
   }
 }
 
@@ -128,5 +231,40 @@
   
   .text-gradient {
     @apply bg-gradient-to-br from-primary via-secondary to-accent bg-clip-text text-transparent;
+  }
+  
+  /* Enhanced animation utilities */
+  .animate-enter-right {
+    animation: slide-in-right 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+  
+  .animate-fade-up {
+    animation: fade-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+  
+  @keyframes fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scale-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 }
