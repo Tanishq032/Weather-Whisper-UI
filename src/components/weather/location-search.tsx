@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Check } from "lucide-react"
+import { toast } from "sonner"
 
 interface LocationSearchProps {
   className?: string
@@ -30,6 +31,7 @@ export function LocationSearch({ className, onLocationSelect, currentLocation }:
   ])
   
   const [filteredCities, setFilteredCities] = useState<string[]>([])
+  const [showCustomAdd, setShowCustomAdd] = useState(false)
 
   // Mock data for popular cities - in a real app, this would come from an API
   const popularCities = [
@@ -44,6 +46,7 @@ export function LocationSearch({ className, onLocationSelect, currentLocation }:
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredCities([]);
+      setShowCustomAdd(false);
       return;
     }
     
@@ -51,6 +54,12 @@ export function LocationSearch({ className, onLocationSelect, currentLocation }:
       city.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredCities(filtered);
+    
+    // Show custom add option if no exact match and search has at least 3 characters
+    const hasExactMatch = popularCities.some(
+      city => city.toLowerCase() === searchQuery.toLowerCase()
+    );
+    setShowCustomAdd(!hasExactMatch && searchQuery.length >= 3);
   }, [searchQuery]);
 
   const handleSearch = () => {
@@ -75,10 +84,10 @@ export function LocationSearch({ className, onLocationSelect, currentLocation }:
           onLocationSelect(partialMatch);
         }
       } else {
-        // If it's not in our list, still allow it but with a warning in a real app
-        // For this demo, we'll just use it as is
+        // If it's not in our list, we'll add it as a custom city
         setRecentSearches(prev => [searchQuery, ...prev].slice(0, 5));
         onLocationSelect(searchQuery);
+        toast.success(`Weather data for ${searchQuery} loaded successfully!`);
       }
     } else if (searchQuery) {
       onLocationSelect(searchQuery);
@@ -87,14 +96,24 @@ export function LocationSearch({ className, onLocationSelect, currentLocation }:
     setOpen(false);
   }
 
-  const handleLocationClick = (location: string) => {
-    onLocationSelect(location);
+  const handleAddCustomCity = () => {
+    if (searchQuery.trim()) {
+      // Format the city name with proper capitalization
+      const formattedCityName = searchQuery.trim()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      
+      setRecentSearches(prev => [formattedCityName, ...prev].slice(0, 5));
+      onLocationSelect(formattedCityName);
+      toast.success(`Weather data for ${formattedCityName} loaded successfully!`);
+      setSearchQuery("");
+      setOpen(false);
+    }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
+  const handleLocationClick = (location: string) => {
+    onLocationSelect(location);
   }
 
   const handleRemoveLocation = (location: string, e: React.MouseEvent) => {
@@ -140,7 +159,24 @@ export function LocationSearch({ className, onLocationSelect, currentLocation }:
                     onValueChange={setSearchQuery}
                   />
                   <CommandList>
-                    <CommandEmpty>No city found.</CommandEmpty>
+                    <CommandEmpty>
+                      {showCustomAdd ? (
+                        <div className="py-3 px-2">
+                          <p className="text-sm text-muted-foreground mb-2">
+                            No matching cities found. Add a custom city?
+                          </p>
+                          <Button 
+                            onClick={handleAddCustomCity}
+                            className="w-full"
+                            size="sm"
+                          >
+                            Add "{searchQuery}"
+                          </Button>
+                        </div>
+                      ) : (
+                        "No city found. Type at least 3 characters to add custom city."
+                      )}
+                    </CommandEmpty>
                     <CommandGroup heading="Suggestions">
                       {filteredCities.length > 0 ? (
                         filteredCities.map((city) => (
@@ -189,6 +225,17 @@ export function LocationSearch({ className, onLocationSelect, currentLocation }:
                           </CommandItem>
                         ))
                       )}
+                      
+                      {showCustomAdd && (
+                        <CommandItem
+                          value={`add-${searchQuery}`}
+                          onSelect={() => handleAddCustomCity()}
+                          className="border-t border-border mt-1 pt-1"
+                        >
+                          <MapPin className="mr-2 h-4 w-4 text-primary" />
+                          Add "{searchQuery}"
+                        </CommandItem>
+                      )}
                     </CommandGroup>
                   </CommandList>
                 </Command>
@@ -203,8 +250,10 @@ export function LocationSearch({ className, onLocationSelect, currentLocation }:
                     // In a real app, you'd convert coordinates to a location name
                     // For demo purposes, just use "Current Location"
                     onLocationSelect("Current Location");
+                    toast.success("Using your current location!");
                   },
                   (error) => {
+                    toast.error("Error getting location. Please search manually.");
                     console.error("Error getting location", error);
                   }
                 );

@@ -129,6 +129,37 @@ export function WeatherStats({
     return time;
   }
 
+  // Custom label for the UV index pie chart to fix text overlap
+  const renderCustomizedPieLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    index,
+    time
+  }: any) => {
+    // Calculate position for the label
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 1.4; // Move labels further out
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="var(--foreground)"
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+        fontSize="11"
+        fontWeight={index === activeIndex ? "bold" : "normal"}
+      >
+        {time}
+      </text>
+    );
+  };
+
   return (
     <Card className={cn(
       "bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all duration-300",
@@ -316,7 +347,7 @@ export function WeatherStats({
               <Sun className="h-4 w-4 text-primary" />
               <h3 className="font-medium">UV Index</h3>
             </div>
-            <div className="h-[200px] w-full p-1 transition-all duration-500 flex items-center justify-center">
+            <div className="h-[220px] w-full p-1 transition-all duration-500 flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -324,7 +355,7 @@ export function WeatherStats({
                     cx="50%"
                     cy="50%"
                     innerRadius={isHighContrast ? 40 : 45}
-                    outerRadius={isHighContrast ? 80 : 75}
+                    outerRadius={isHighContrast ? 70 : 65}
                     paddingAngle={isHighContrast ? 5 : 3}
                     dataKey="index"
                     nameKey="time"
@@ -335,8 +366,12 @@ export function WeatherStats({
                     strokeWidth={isHighContrast ? 2 : 1}
                     stroke={isHighContrast ? "#000" : "rgba(0,0,0,0.1)"}
                     onMouseEnter={onPieEnter}
-                    label={(entry) => entry.time}
-                    labelLine={{ stroke: 'var(--muted-foreground)', strokeWidth: 0.5 }}
+                    label={renderCustomizedPieLabel}
+                    labelLine={{
+                      stroke: 'var(--muted-foreground)',
+                      strokeWidth: 0.5,
+                      strokeDasharray: '3 3'
+                    }}
                   >
                     {uvIndexData.map((entry, index) => (
                       <Cell 
